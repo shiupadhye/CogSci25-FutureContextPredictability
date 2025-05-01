@@ -1,0 +1,17 @@
+﻿Construct,Predictor,Variable,Beta,SE,p_value,Model
+Unigram Predictability,Unigram Predictability,unigram_logProb,0.829270501,0.031264851,0.00E+00,Model with Decorr Backward Predictability
+Forward Predictability ,Forward Predictability ,infillFw_logProb,0.220873916,0.030596458,0.00E+00,Model with Decorr Backward Predictability
+Planning,Decorr Backward Predictability,decorr_infillBw_logProb,-0.382307427,0.07249409,0.00E+00,Model with Decorr Backward Predictability
+Communicative Reward,Semantic Distance,NoisySemDist,-2.498222459,0.191655819,0.00E+00,Model with Decorr Backward Predictability
+Communicative Reward,Phonemic Distance,NoisyPhonDist,-0.400435754,0.033522794,0.00E+00,Model with Decorr Backward Predictability
+Unigram Predictability,Unigram Predictability,unigram_logProb,0.828081455,0.031279351,0.00E+00, Model with PMI
+Forward Predictability ,Forward Predictability ,infillFw_logProb,0.223088657,0.030567638,0.00E+00, Model with PMI
+Planning,PMI,infill_pmiFP,-0.62287411,0.095767636,0.00E+00, Model with PMI
+Communicative Reward,Semantic Distance,NoisySemDist,-2.441089974,0.19241747,0.00E+00, Model with PMI
+Communicative Reward,Phonemic Distance,NoisyPhonDist,-0.404059264,0.033582542,0.00E+00, Model with PMI
+Unigram Predictability,Unigram Predictability,unigram_logProb,0.831152323,0.031518423,0.00E+00,Model with both
+Forward Predictability ,Forward Predictability ,infillFw_logProb,0.218661549,0.030844359,0.00E+00,Model with both
+Planning,Decorr Backward Predictability,decorr_infillBw_logProb,-0.123682249,0.096409644,0.199533231,Model with both
+Planning,PMI,infill_pmiFP,-0.513195916,0.128526803,0.00E+00,Model with both
+Communicative Reward,Semantic Distance,NoisySemDist,-2.448905876,0.192515519,0.00E+00,Model with both
+Communicative Reward,Phonemic Distance,NoisyPhonDist,-0.403765095,0.033558025,0.00E+00,Model with both

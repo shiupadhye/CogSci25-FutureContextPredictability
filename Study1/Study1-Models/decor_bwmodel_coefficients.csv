@@ -1,0 +1,8 @@
+"Predictor","Beta","SE","p_value","Model"
+"word_len",0.0841438982614545,0.000289245459788805,0,"w/ Decorr Backward Predictability"
+"uttrSR",-0.0264247110905955,0.00012175997479505,0,"w/ Decorr Backward Predictability"
+"age",0.00021055993283879,7.09166109487728e-05,0.00319290807599719,"w/ Decorr Backward Predictability"
+"sexM",-0.0108458134559528,0.00150602284858497,3.79955560020281e-12,"w/ Decorr Backward Predictability"
+"unigram_logProb",-0.0233588423839341,9.09354599380582e-05,0,"w/ Decorr Backward Predictability"
+"infillFw_logProb",-0.00537989192042458,8.81862258808586e-05,0,"w/ Decorr Backward Predictability"
+"decorr_infillBw_logProb",-0.0224400564304716,0.000313441777169838,0,"w/ Decorr Backward Predictability"

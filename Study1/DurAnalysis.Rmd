@@ -1,0 +1,310 @@
+---
+title: "Duration Analysis"
+output:
+  pdf_document: default
+  html_notebook: default
+  html_document:
+    df_print: paged
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r load libraries}
+library(tidyverse)
+library(lme4)
+library(ggpubr)
+library(lmtest)
+library(patchwork)
+library(ggeffects)
+library(lmerTest)
+```
+
+```{r}
+scores <- read_csv('SWBD_DurAnalysisData.csv')
+```
+
+```{r}
+scores <- scores %>%
+  filter(CLASS != 'OTHER')
+```
+
+
+```{r}
+m.IF.bw <- lm(infillBw_logProb ~ infillFw_logProb, data = scores)
+scores$decor_infillBw_logProb = residuals(m.IF.bw)
+```
+
+
+```{r}
+length(unique(scores$speaker_id))
+```
+
+## Modeling
+
+```{r}
+get_model_coeffs <- function(model, model_name = "Model") {
+  # Get summary
+  s <- summary(model)
+  coefs <- as.data.frame(coef(s))
+
+  # Remove intercept
+  coefs <- coefs[rownames(coefs) != "(Intercept)", , drop = FALSE]
+
+  # Format result
+  df <- data.frame(
+    Predictor = rownames(coefs),
+    Beta = coefs$Estimate,
+    SE = coefs$`Std. Error`,
+    p_value = coefs$`Pr(>|t|)`,
+    Model = model_name,
+    row.names = NULL,
+    stringsAsFactors = FALSE
+  )
+
+  return(df)
+}
+```
+
+
+
+```{r}
+m.llm.IF.bw <- lmer(duration ~ word_len + uttrSR + age + sex + unigram_logProb + infillFw_logProb + infillBw_logProb + (1|speaker_id), data = scores)
+summary(m.llm.IF.bw)
+```
+
+
+```{r}
+m.llm.IF.bw.coefs <- get_model_coeffs(m.llm.IF.bw,'w/ Backward Predictability')
+```
+
+
+```{r}
+m.llm.IF.bwdecor <- lmer(duration ~ word_len + uttrSR + age + sex + unigram_logProb + infillFw_logProb + decor_infillBw_logProb + (1|speaker_id), data = scores)
+summary(m.llm.IF.bwdecor)
+```
+
+```{r}
+m.llm.IF.bwdecor.coefs <- get_model_coeffs(m.llm.IF.bwdecor,'w/ Decorr Backward Predictability')
+```
+
+
+```{r}
+m.llm.IF.pmiFP <- lmer(duration ~ word_len + uttrSR + age + sex + unigram_logProb + infillFw_logProb + infill_pmiFP + (1|speaker_id), data = scores)
+summary(m.llm.IF.pmiFP)
+```
+
+```{r}
+m.llm.IF.pmiFP.coefs <- get_model_coeffs(m.llm.IF.pmiFP,'w/ PMI')
+```
+
+```{r}
+m.llm.IF.both <- lmer(duration ~ word_len + uttrSR + age + sex + unigram_logProb + infillFw_logProb + decor_infillBw_logProb + infill_pmiFP + (1|speaker_id), data = scores)
+summary(m.llm.IF.both)
+```
+
+```{r}
+m.llm.IF.both.coefs <- get_model_coeffs(m.llm.IF.both,'w/ PMI')
+```
+
+
+```{r}
+m.llm.IF.neither <- lmer(duration ~ word_len + uttrSR + age + sex + unigram_logProb + infillFw_logProb  + (1|speaker_id), data = scores)
+summary(m.llm.IF.neither)
+```
+
+```{r}
+lrtest(m.llm.IF.bwdecor,m.llm.IF.pmiFP)
+```
+
+```{r}
+ModelComp.AIC <- AIC(m.llm.IF.neither,m.llm.IF.bwdecor,m.llm.IF.pmiFP,m.llm.IF.both)
+```
+
+
+
+Write to file
+```{r}
+write.csv(m.llm.IF.bw.coefs, "Models/Study1/bw_model_coefficients.csv", row.names = FALSE)
+write.csv(m.llm.IF.bwdecor.coefs, "Models/Study1/decor_bwmodel_coefficients.csv", row.names = FALSE)
+write.csv(m.llm.IF.pmiFP.coefs, "Models/Study1/PMI_model_coefficients.csv", row.names = FALSE)
+write.csv(m.llm.IF.both.coefs, "Models/Study1/bothmodel_coefficients.csv", row.names = FALSE)
+```
+
+
+```{r}
+write.csv(ModelComp.AIC,"Models/Study1/AIC.csv", row.names = FALSE)
+```
+
+
+### Function-content distinction
+
+```{r}
+scores.content <- scores %>%
+  filter(CLASS == 'CONTENT')
+scores.func <- scores %>%
+  filter(CLASS == 'FUNCTION')
+```
+
+```{r}
+m.llm.IF.decorBw.FuncContentDist.wInt <- lmer(duration ~ word_len + uttrSR + age + sex + unigram_logProb + infillFw_logProb + decor_infillBw_logProb + CLASS * infillFw_logProb  + CLASS * decor_infillBw_logProb + (1|speaker_id), data = scores)
+summary(m.llm.IF.decorBw.FuncContentDist.wInt)
+```
+
+
+```{r}
+m.llm.IF.pmiFP.FuncContentDist.wInt <- lmer(duration ~ word_len + uttrSR + age + sex + unigram_logProb + infillFw_logProb + infill_pmiFP + CLASS * infillFw_logProb  + CLASS * infill_pmiFP + (1|speaker_id), data = scores)
+summary(m.llm.IF.pmiFP.FuncContentDist.wInt)
+```
+
+
+## Visualization
+
+```{r}
+durCoefData <- read_csv('models/Study1/model_coefficients.csv')
+head(durCoefData)
+```
+```{r}
+durCoefData <- durCoefData %>%
+  filter(Construct != "Control")
+```
+
+
+```{r}
+durCoefData$significance <- ifelse(durCoefData$p_value < 0.001, "***",
+                            ifelse(durCoefData$p_value < 0.01, "**",
+                                   ifelse(durCoefData$p_value < 0.05, "*", "ns")))
+
+head(durCoefData)
+```
+
+```{r}
+durCoefData$Construct <- factor(durCoefData$Construct, levels = c("Unigram Predictability", "Forward Predictability","Planning")) 
+
+durCoefData$Predictor <- factor(durCoefData$Predictor, levels = c("Unigram Predictability", "Forward Predictability","Backward Predictability", "Decorr Backward Predictability", "PMI")) 
+```
+
+```{r}
+durCoefData.filtered <- durCoefData %>%
+  filter(Model != "Model with both") %>%
+  filter(Model != "Model with Backward Predictability") %>%
+  filter(!(Model == "Model with Backward Predictability" & Predictor %in% c("PMI", "Decorrelated Backward Predictability"))) %>%
+  filter(!(Model == "Model with Decorr Backward Predictability" & Predictor %in% c("Backward Predictability", "PMI"))) %>%
+  filter(!(Model == "Model PMI" & Predictor %in% c("Backward Predictability", "Decorr Backward Predictability")))
+```
+
+```{r}
+dur.colors <- c('#009E73','#0072B2','#8E4585')
+p1 <- ggplot(durCoefData.filtered,aes(x=Predictor,y=Beta,fill=Construct)) +
+  geom_bar(stat = "identity", position = position_dodge(width=0.8)) +
+  scale_fill_manual(values = dur.colors) +  # Using hex colors
+  geom_errorbar(aes(ymin=Beta-SE,ymax=Beta+SE),position = position_dodge(width = 0.8),width=0.2)+
+  geom_text(aes(label = significance), 
+            position = position_dodge(width = 0.8), vjust = 1.75,size = 3) +
+  facet_wrap(~Model,scales = "free_x") +
+  ylab('Model Coefficients') +
+  xlab('Key Predictors') +
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "bold", color = "black"),  # x-axis text
+    axis.text.y = element_text(face = "bold", color = "black"),  # y-axis text
+    axis.title.x = element_text(face = "bold", color = "black"),  # x-axis title
+    axis.title.y = element_text(face = "bold", color = "black"),  # y-axis title
+    plot.title = element_text(face = "bold", color = "black"),  # plot title
+    strip.text = element_text(face = "bold", color = "black"),  # facet labels
+    legend.position = "none") +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
+
+```{r}
+AICdata <- read_csv('models/Study1/AIC.csv')
+head(AICdata)
+```
+
+```{r}
+AICdata$Model <- factor(AICdata$Model,levels=c('Baseline','Decorr Backward Predictability','PMI','Both'))
+```
+
+```{r}
+p2 <- AICdata %>%
+  filter(Model != 'Baseline') %>%
+  ggplot(aes(x=Model,y=DeltaAIC)) +
+  geom_bar(stat = "identity", fill="#BCCBD4", position = position_dodge(width=0.8)) +
+  ylab(expression(Delta~AIC)) +
+  #scale_fill_viridis_d(option = "cividis") +
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "bold", color = "black"),  # x-axis text
+    axis.text.y = element_text(face = "bold", color = "black"),  # y-axis text
+    axis.title.x = element_text(face = "bold", color = "black"),  # x-axis title
+    axis.title.y = element_text(face = "bold", color = "black"),  # y-axis title
+    plot.title = element_text(face = "bold", color = "black"),  # plot title
+    strip.text = element_text(face = "bold", color = "black")) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
+
+
+```{r fig.width=4, fig.height=1.5}
+p1 + p2 + plot_layout(widths = c(2, 1))
+```
+
+
+```{r}
+# Define custom aesthetics for each group
+pred.FwClassInt <- ggpredict(m.llm.IF.decorBw.FuncContentDist.wInt, terms = c("infillFw_logProb", "CLASS"))
+int.p1 <- ggplot(pred.FwClassInt, aes(x = x, y = predicted, color = group,linetype=group)) +
+  geom_line(size = 1) +
+  scale_color_manual(values = c("#C51B7D","#E58D0A")) +
+  scale_linetype_manual(values = c("dotted","solid")) +
+  labs(x = "Forward Predictability \n (log transformed)", y = "Predicted Duration (s)") +
+  guides(color = "none", linetype = "none", fill = "none") +  # <- kills legend
+  theme(legend.position = "none")  +
+  theme_minimal() +
+  theme(axis.text.x = element_text(face = "bold", color = "black"),  # x-axis text
+    axis.text.y = element_text(face = "bold", color = "black"),  # y-axis text
+    axis.title.x = element_text(face = "bold", color = "black"),  # x-axis title
+    axis.title.y = element_text(face = "bold", color = "black"),  # y-axis title
+    plot.title = element_text(face = "bold", color = "black"))
+```
+
+```{r}
+pred.BwClassInt <- ggpredict(m.llm.IF.decorBw.FuncContentDist.wInt, terms = c("decor_infillBw_logProb", "CLASS"))
+int.p2 <- ggplot(pred.BwClassInt, aes(x = x, y = predicted, color = group,linetype = group)) +
+  geom_line(size = 1) +
+  scale_color_manual(values = c("#C51B7D","#E58D0A")) +
+  scale_linetype_manual(values = c("dotted","solid")) +
+  labs(x = "Decorr Backward Predictability \n (log transformed)", y = "") +
+  guides(color = "none", linetype = "none", fill = "none") +  # <- kills legend
+  theme(legend.position = "none")  +
+  theme_minimal() +
+  theme(axis.text.x = element_text(face = "bold", color = "black"),  # x-axis text
+    axis.text.y = element_text(face = "bold", color = "black"),  # y-axis text
+    axis.title.x = element_text(face = "bold", color = "black"),  # x-axis title
+    axis.title.y = element_text(face = "bold", color = "black"),  # y-axis title
+    plot.title = element_text(face = "bold", color = "black"))
+```
+
+```{r}
+pred.PMIClassInt <- ggpredict(m.llm.IF.pmiFP.FuncContentDist.wInt, terms = c("infill_pmiFP", "CLASS"))
+int.p3 <- ggplot(pred.PMIClassInt, aes(x = x, y = predicted, color = group, linetype=group)) +
+  geom_line(size = 1) +
+  scale_color_manual(values = c("#C51B7D","#E58D0A")) +
+  scale_linetype_manual(values = c("dotted","solid")) +
+  labs(x = "PMI", y = "",color = "Lexical Category",linetype = "Lexical Category") +
+  #guides(color = "none", linetype = "none", fill = "none") +  # <- kills legend
+  #theme(legend.position = "none")  +
+  theme_minimal() +
+  theme(axis.text.x = element_text(face = "bold", color = "black"),  # x-axis text
+    axis.text.y = element_text(face = "bold", color = "black"),  # y-axis text
+    axis.title.x = element_text(face = "bold", color = "black"),  # x-axis title
+    axis.title.y = element_text(face = "bold", color = "black"),  # y-axis title
+    plot.title = element_text(face = "bold", color = "black"),
+    legend.title = element_text(face = "bold"))
+```
+
+
+```{r fig.width=4, fig.height=2}
+int.p1 + int.p2 + int.p3 
+```
+

@@ -1,0 +1,8 @@
+"Predictor","Beta","SE","p_value","Model"
+"word_len",0.084143898265767,0.000289245459800282,0,"w/ Backward Predictability"
+"uttrSR",-0.0264247111170453,0.000121759974705318,0,"w/ Backward Predictability"
+"age",0.000210559931737542,7.09166023217044e-05,0.00319290438485005,"w/ Backward Predictability"
+"sexM",-0.0108458134575246,0.00150602266363617,3.79952769887154e-12,"w/ Backward Predictability"
+"unigram_logProb",-0.0233588423824554,9.09354599419739e-05,0,"w/ Backward Predictability"
+"infillFw_logProb",0.0170601645026742,0.000309291361447564,0,"w/ Backward Predictability"
+"infillBw_logProb",-0.0224400564228851,0.000313441777180439,0,"w/ Backward Predictability"

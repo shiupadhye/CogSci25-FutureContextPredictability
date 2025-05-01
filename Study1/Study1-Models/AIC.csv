@@ -1,0 +1,5 @@
+Model,df,AIC,DeltaAIC
+Baseline,9,-885333.0766,0
+Decorr Backward Predictability,10,-890421.1514,-5088.0748
+PMI,10,-886440.9071,-1107.8305
+Both,11,-890487.4524,-5154.3758

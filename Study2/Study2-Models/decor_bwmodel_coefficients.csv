@@ -1,0 +1,6 @@
+"Predictor","Beta","SE","p_value","Model"
+"unigram_logProb",0.829270500670622,0.031264850600424,5.11809103417378e-155,"w/ Decorr Backward Predictability"
+"infillFw_logProb",0.22087391648635,0.0305964579686958,5.23953441156122e-13,"w/ Decorr Backward Predictability"
+"decorr_infillBw_logProb",-0.382307427143335,0.0724940899933588,1.33747213553854e-07,"w/ Decorr Backward Predictability"
+"NoisySemDist",-2.49822245916595,0.191655819360958,7.74260328526432e-39,"w/ Decorr Backward Predictability"
+"NoisyPhonDist",-0.400435754438413,0.0335227941120089,6.8802605274681e-33,"w/ Decorr Backward Predictability"
